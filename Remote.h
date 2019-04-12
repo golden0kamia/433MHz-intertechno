@@ -1,3 +1,14 @@
+#ifndef Remote_h
+#define Remote_h
+
+void Remote_init(char sendPin, char recievePin, char repaeat = 5);
+void Remote_send(int adresse, int group, char unit, char state);
+
+#endif
+
+
+
+/*
 //-------- Global variables --------//
 char pin = 4;
 int repeat = 4;
@@ -92,3 +103,4 @@ void sendBit(int bitSend)
 		delayMicroseconds(time * 5);
 	}
 }
+*/
