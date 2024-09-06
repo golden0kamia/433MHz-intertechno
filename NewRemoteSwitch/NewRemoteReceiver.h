@@ -7,7 +7,8 @@
 #ifndef NewRemoteReceiver_h
 #define NewRemoteReceiver_h
 
-#include <Arduino.h>
+// #include <Arduino.h>
+#include <stdlib.h>
 
 struct NewRemoteCode {
 	enum SwitchType {
@@ -18,11 +19,11 @@ struct NewRemoteCode {
 
 	unsigned int period;		// Detected duration in microseconds of 1T in the received signal
 	unsigned long address;		// Address of received code. [0..2^26-1]
-	boolean groupBit;			// Group bit set or not
+	bool groupBit;			// Group bit set or not
 	SwitchType switchType;		// off, on, dim, on_with_dim.
-	byte unit;					// Unit code of received code [0..15]
-	boolean dimLevelPresent;	// Dim level present or not. Will be available for switchType dim, but might be available for on or off too, depending on remote.
-	byte dimLevel;				// Dim level [0..15]. Will be available if switchType is dim, on_with_dim or off_with_dim.
+	unsigned char unit;					// Unit code of received code [0..15]
+	bool dimLevelPresent;	// Dim level present or not. Will be available for switchType dim, but might be available for on or off too, depending on remote.
+	unsigned char dimLevel;				// Dim level [0..15]. Will be available if switchType is dim, on_with_dim or off_with_dim.
 };
 
 typedef void (*NewRemoteReceiverCallBack)(NewRemoteCode);

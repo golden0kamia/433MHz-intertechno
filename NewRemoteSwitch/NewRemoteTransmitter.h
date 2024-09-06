@@ -7,7 +7,15 @@
 #ifndef NewRemoteTransmitter_h
 #define NewRemoteTransmitter_h
 
-#include <Arduino.h>
+
+#ifdef AVR
+    #include <xc.h>
+    #include <stdlib.h>
+    #define byte unsigned char
+    #define boolean bool
+#else
+    #include <Arduino.h>
+#endif
 
 /**
 * NewRemoteTransmitter provides a generic class for simulation of common RF remote controls, like the A-series
