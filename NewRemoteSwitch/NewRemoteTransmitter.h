@@ -10,12 +10,12 @@
 
 #ifdef AVR
     #include <xc.h>
-    #include <stdlib.h>
-    #define byte unsigned char
-    #define boolean bool
-#else
-    #include <Arduino.h>
 #endif
+
+#include <stdlib.h>
+
+#define __DELAY_BACKWARD_COMPATIBLE__
+#include <util/delay.h>
 
 /**
 * NewRemoteTransmitter provides a generic class for simulation of common RF remote controls, like the A-series
@@ -48,14 +48,14 @@ class NewRemoteTransmitter {
 		* @param periodusec	Duration of one period, in microseconds. One bit takes 8 periods (but only 4 for 'dim' signal).
 		* @param repeats	[0..8] The 2log-Number of times the signal is repeated. The actual number of repeats will be 2^repeats. 2 would be bare minimum, 4 seems robust, 8 is maximum (and overkill).
 		*/
-		NewRemoteTransmitter(unsigned long address, byte pin, unsigned int periodusec = 260, byte repeats = 4);
+		NewRemoteTransmitter(unsigned long address, unsigned char pin, unsigned int periodusec = 260, unsigned char repeats = 4, void (*pinWrite_callback)(bool state));
 
 		/**
 		 * Send on/off command to the address group.
 		 *
 		 * @param switchOn  True to send "on" signal, false to send "off" signal.
 		 */
-		void sendGroup(boolean switchOn);
+		void sendGroup(bool switchOn);
 
 		/**
 		 * Send on/off command to an unit on the current address.
@@ -63,7 +63,7 @@ class NewRemoteTransmitter {
 		 * @param unit      [0..15] target unit.
 		 * @param switchOn  True to send "on" signal, false to send "off" signal.
 		 */
-		void sendUnit(byte unit, boolean switchOn);
+		void sendUnit(unsigned char unit, bool switchOn);
 
 		/**
 		 * Send dim value to an unit on the current address. This will also switch on the device.
@@ -73,7 +73,7 @@ class NewRemoteTransmitter {
 		 * @param unit      [0..15] target unit.
 		 * @param dimLevel  [0..15] Dim level. 0 for off, 15 for brightest level.
 		 */
-		void sendDim(byte unit, byte dimLevel);
+		void sendDim(unsigned char unit, unsigned char dimLevel);
 		
 		/**
 		 * Send dim value the current address group. This will also switch on the device.
@@ -82,13 +82,14 @@ class NewRemoteTransmitter {
 		 *
 		 * @param dimLevel  [0..15] Dim level. 0 for off, 15 for brightest level.
 		 */
-		void sendGroupDim(byte dimLevel);
+		void sendGroupDim(unsigned char dimLevel);
 
 	protected:
 		unsigned long _address;		// Address of this transmitter.
-		byte _pin;					// Transmitter output pin
+		unsigned char _pin;					// Transmitter output pin
 		unsigned int _periodusec;	// Oscillator period in microseconds
-		byte _repeats;				// Number over repetitions of one telegram
+		unsigned char _repeats;				// Number over repetitions of one telegram
+        void (*pinWrite)(bool state);
 
 		/**
 		 * Transmits start-pulse
@@ -105,7 +106,7 @@ class NewRemoteTransmitter {
 		 *
 		 * @param unit      [0-15] target unit.
 		 */
-		void _sendUnit(byte unit);
+		void _sendUnit(unsigned char unit);
 
 		/**
 		 * Transmits stop pulse.
@@ -117,6 +118,6 @@ class NewRemoteTransmitter {
 		 *
 		 * @param isBitOne	True, to send '1', false to send '0'.
 		 */
-		void _sendBit(boolean isBitOne);
+		void _sendBit(bool isBitOne);
 };
 #endif

@@ -8,16 +8,15 @@
 #include "NewRemoteTransmitter.h"
 
 
-NewRemoteTransmitter::NewRemoteTransmitter(unsigned long address, byte pin, unsigned int periodusec, byte repeats) {
+NewRemoteTransmitter::NewRemoteTransmitter(unsigned long address, unsigned char pin, unsigned int periodusec, unsigned char repeats, void (*pinWrite_callback)(bool state)) {
 	_address = address;
-	_pin = pin;
 	_periodusec = periodusec;
 	_repeats = (1 << repeats) - 1; // I.e. _repeats = 2^repeats - 1
-
-	pinMode(_pin, OUTPUT);
+    
+    pinWrite = pinWrite_callback;
 }
 
-void NewRemoteTransmitter::sendGroup(boolean switchOn) {
+void NewRemoteTransmitter::sendGroup(bool switchOn) {
 	for (int8_t i = _repeats; i >= 0; i--) {
 		_sendStartPulse();
 
@@ -36,7 +35,7 @@ void NewRemoteTransmitter::sendGroup(boolean switchOn) {
 	}
 }
 
-void NewRemoteTransmitter::sendUnit(byte unit, boolean switchOn) {
+void NewRemoteTransmitter::sendUnit(unsigned char unit, bool switchOn) {
 	for (int8_t i = _repeats; i >= 0; i--) {
 		_sendStartPulse();
 
@@ -54,7 +53,7 @@ void NewRemoteTransmitter::sendUnit(byte unit, boolean switchOn) {
 	}
 }
 
-void NewRemoteTransmitter::sendDim(byte unit, byte dimLevel) {
+void NewRemoteTransmitter::sendDim(unsigned char unit, unsigned char dimLevel) {
 	for (int8_t i = _repeats; i >= 0; i--) {
 		_sendStartPulse();
 
@@ -64,14 +63,14 @@ void NewRemoteTransmitter::sendDim(byte unit, byte dimLevel) {
 		_sendBit(false);
 
 		// Switch type 'dim'
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec);
 
 		_sendUnit(unit);
 
@@ -83,7 +82,7 @@ void NewRemoteTransmitter::sendDim(byte unit, byte dimLevel) {
 	}
 }
 
-void NewRemoteTransmitter::sendGroupDim(byte dimLevel) {
+void NewRemoteTransmitter::sendGroupDim(unsigned char dimLevel) {
 	for (int8_t i = _repeats; i >= 0; i--) {
 		_sendStartPulse();
 
@@ -93,14 +92,14 @@ void NewRemoteTransmitter::sendGroupDim(byte dimLevel) {
 		_sendBit(true);
 
 		// Switch type 'dim'
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec);
 
 		_sendUnit(0);
 
@@ -113,10 +112,10 @@ void NewRemoteTransmitter::sendGroupDim(byte dimLevel) {
 }
 
 void NewRemoteTransmitter::_sendStartPulse(){
-	digitalWrite(_pin, HIGH);
-	delayMicroseconds(_periodusec);
-	digitalWrite(_pin, LOW);
-	delayMicroseconds(_periodusec * 10 + (_periodusec >> 1)); // Actually 10.5T insteat of 10.44T. Close enough.
+	pinWrite(1);
+	_delay_us(_periodusec);
+	pinWrite(0);
+	_delay_us(_periodusec * 10 + (_periodusec >> 1)); // Actually 10.5T insteat of 10.44T. Close enough.
 }
 
 void NewRemoteTransmitter::_sendAddress() {
@@ -125,39 +124,39 @@ void NewRemoteTransmitter::_sendAddress() {
 	}
 }
 
-void NewRemoteTransmitter::_sendUnit(byte unit) {
+void NewRemoteTransmitter::_sendUnit(unsigned char unit) {
 	for (int8_t i=3; i>=0; i--) {
 	   _sendBit(unit & 1<<i);
 	}
 }
 
 void NewRemoteTransmitter::_sendStopPulse() {
-	digitalWrite(_pin, HIGH);
-	delayMicroseconds(_periodusec);
-	digitalWrite(_pin, LOW);
-	delayMicroseconds(_periodusec * 40);
+	pinWrite(1);
+	_delay_us(_periodusec);
+	pinWrite(0);
+	_delay_us(_periodusec * 40);
 }
 
-void NewRemoteTransmitter::_sendBit(boolean isBitOne) {
+void NewRemoteTransmitter::_sendBit(bool isBitOne) {
 	if (isBitOne) {
 		// Send '1'
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec * 5);
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec * 5);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec);
 	} else {
 		// Send '0'
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, HIGH);
-		delayMicroseconds(_periodusec);
-		digitalWrite(_pin, LOW);
-		delayMicroseconds(_periodusec * 5);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec);
+		pinWrite(1);
+		_delay_us(_periodusec);
+		pinWrite(0);
+		_delay_us(_periodusec * 5);
 	}
 }
